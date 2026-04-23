@@ -97,19 +97,30 @@ An array of category names or regular expression strings defining the sorting or
 You can also provide custom regular expressions as strings in the `order` array. For example, to add a custom group for icon classes before spacing:
 
 ```javascript
-'vuetify-sorting/sort-vuetify-classes': ['warn', {
-  order: [
-    'components',
-    'layout',
-    'flexGrid',
-    'sizing',
-    '^icon-',       // custom regex: matches classes starting with "icon-"
-    'spacing',
-    'typography',
-    'visuals',
-    'misc'
-  ]
-}]
+import vuetifySorting from 'eslint-plugin-vuetify-sorting';
+
+export default [
+  {
+    plugins: {
+      'vuetify-sorting': vuetifySorting
+    },
+    rules: {
+      'vuetify-sorting/sort-vuetify-classes': ['warn', {
+        order: [
+          'components',
+          'layout',
+          'flexGrid',
+          'sizing',
+          '^icon-',       // custom regex: matches classes starting with "icon-"
+          'spacing',
+          'typography',
+          'visuals',
+          'misc'
+        ]
+      }]
+    }
+  }
+];
 ```
 
 Classes that do not match any of the defined categories (or custom regexes) are moved to the end of the class list and sorted alphabetically.
