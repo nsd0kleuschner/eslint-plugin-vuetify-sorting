@@ -3,7 +3,7 @@ import { ESLintUtils } from '@typescript-eslint/utils';
 const defaultGroups: Record<string, RegExp[]> = {
   components: [/^c-/, /^o-/],
   layout: [/^d-/, /^float-/, /^position-/, /^top-/, /^bottom-/, /^left-/, /^right-/, /^z-/, /^overflow-/, /^clear-/],
-  flexGrid: [/^flex-/, /^justify-/, /^align-/, /^order-/, /^grid-/, /^v-col-/, /^v-row-/],
+  flexGrid: [/^flex-/, /^justify-/, /^align-/, /^order-/, /^grid-/],
   sizing: [/^w-/, /^h-/, /^min-w-/, /^max-w-/, /^min-h-/, /^max-h-/, /^mw-/, /^mh-/, /^fill-height/],
   spacing: [/^[mp][atblrsexy]?-/, /^g[axy]-/],
   typography: [/^text-/, /^font-/],

@@ -30,7 +30,7 @@ export default [
 ];
 ```
 
-> ⚠️ **Important:** Do **not** spread `vuetifySorting.configs.recommended` into another config object using `...`. This will overwrite the `rules` from `recommended` with your own `rules` object, causing the plugin to silently do nothing. Always pass it as a **separate** entry in the config array.
+> Do **not** spread `vuetifySorting.configs.recommended` into another config object using `...`. This will overwrite the `rules` from `recommended` with your own `rules` object, causing the plugin to silently do nothing. Always pass it as a **separate** entry in the config array.
 
 ### Usage with Nuxt (`withNuxt`)
 
@@ -83,7 +83,7 @@ export default [
 
 An array of category names or regular expression strings defining the sorting order.
 
-#### Available Categories:
+#### Available Categories (in default order):
 
 - `components and objects`: Classes starting with `c-`, `o-`
 - `layout`: `d-`, `float-`, `position-`, `top-`, `bottom-`, `left-`, `right-`, `z-`, `overflow-`, `clear-`
@@ -94,7 +94,23 @@ An array of category names or regular expression strings defining the sorting or
 - `visuals`: `bg-`, `border-`, `rounded-`, `elevation-`, `theme--`, `opacity-`
 - `misc`: `cursor-`, `pointer-events-`, `user-select-`
 
-You can also provide custom regular expressions as strings in the `order` array.
+You can also provide custom regular expressions as strings in the `order` array. For example, to add a custom group for icon classes before spacing:
+
+```javascript
+'vuetify-sorting/sort-vuetify-classes': ['warn', {
+  order: [
+    'components',
+    'layout',
+    'flexGrid',
+    'sizing',
+    '^icon-',       // custom regex: matches classes starting with "icon-"
+    'spacing',
+    'typography',
+    'visuals',
+    'misc'
+  ]
+}]
+```
 
 Classes that do not match any of the defined categories (or custom regexes) are moved to the end of the class list and sorted alphabetically.
 
