@@ -18,10 +18,43 @@ In your `eslint.config.js`:
 import vuetifySorting from 'eslint-plugin-vuetify-sorting';
 
 export default [
-  // Use the recommended configuration
+  // Use the recommended configuration as a SEPARATE entry
   vuetifySorting.configs.recommended,
   
-  // Or configure it manually
+  // Your other rules in a separate config object
+  {
+    rules: {
+      // your other rules...
+    }
+  }
+];
+```
+
+> ⚠️ **Important:** Do **not** spread `vuetifySorting.configs.recommended` into another config object using `...`. This will overwrite the `rules` from `recommended` with your own `rules` object, causing the plugin to silently do nothing. Always pass it as a **separate** entry in the config array.
+
+### Usage with Nuxt (`withNuxt`)
+
+```javascript
+import withNuxt from './.nuxt/eslint.config.mjs';
+import vuetifySorting from 'eslint-plugin-vuetify-sorting';
+
+export default withNuxt(
+  // Pass recommended as its own separate argument
+  vuetifySorting.configs.recommended,
+  {
+    rules: {
+      // your other rules...
+    }
+  }
+);
+```
+
+### Manual configuration (custom order)
+
+```javascript
+import vuetifySorting from 'eslint-plugin-vuetify-sorting';
+
+export default [
   {
     plugins: {
       'vuetify-sorting': vuetifySorting
