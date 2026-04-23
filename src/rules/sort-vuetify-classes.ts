@@ -80,7 +80,7 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
     }
 
     const sourceCode = context.sourceCode ?? context.getSourceCode();
-    const parserServices = sourceCode.parserServices as any;
+    const parserServices = (context as any).parserServices ?? (sourceCode as any).parserServices;
 
     if (!parserServices?.defineTemplateBodyVisitor) {
       return {};

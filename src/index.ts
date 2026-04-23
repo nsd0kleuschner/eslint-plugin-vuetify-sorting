@@ -3,7 +3,7 @@ import sortVuetifyClasses from './rules/sort-vuetify-classes.js';
 
 interface Plugin {
   rules: Record<string, any>;
-  configs: Record<string, Linter.FlatConfig>;
+  configs: Record<string, Linter.Config>;
 }
 
 const plugin: Plugin = {
