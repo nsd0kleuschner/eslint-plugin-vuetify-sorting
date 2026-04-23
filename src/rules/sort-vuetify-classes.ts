@@ -20,13 +20,16 @@ const defaultOrder = [
   'typography',
   'visuals',
   'misc'
-];
+] as const;
 
+type OrderItem = keyof typeof defaultGroups | string;
 type MessageIds = 'sortVuetifyClasses';
-type Options = [{ order?: string[] }];
+type Options = [{
+  order?: OrderItem[];
+}];
 
 const createRule = ESLintUtils.RuleCreator(
-  (name) => `https://github.com/nsd0kleuschner/eslint-plugin-vuetify-sorting/blob/main/docs/rules/${name}.md`
+    (name) => `https://github.com/nsd0kleuschner/eslint-plugin-vuetify-sorting/blob/main/docs/rules/${name}.md`
 );
 
 const sortVuetifyClassesRule = createRule<Options, MessageIds>({
@@ -43,67 +46,79 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
         properties: {
           order: {
             type: 'array',
-            items: { type: 'string' }
-          }
+            items: {
+              type: 'string',
+            },
+          },
         },
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     ],
     messages: {
-      sortVuetifyClasses: 'Vuetify classes should be sorted.'
+      sortVuetifyClasses: 'Vuetify classes should be sorted.',
     },
-    defaultOptions: [{}],
+    defaultOptions: [{
+      order: [...defaultOrder],
+    }],
   },
   create(context) {
-    const userOrder = context.options[0]?.order || defaultOrder;
-    const orderRegexes: RegExp[] = [];
+    const rawOrder = context.options?.[0]?.order;
+    const userOrder = Array.isArray(rawOrder) && rawOrder.length > 0 ? rawOrder : [...defaultOrder];
 
-    userOrder.forEach(item => {
-      if (defaultGroups[item]) {
-        orderRegexes.push(...defaultGroups[item]);
-      } else {
-        try {
-          orderRegexes.push(new RegExp(item));
-        } catch (e) {
-          // Ignore invalid regexes
-        }
+    const orderRegexes: RegExp[] = [];
+    for (const item of userOrder) {
+      if (item in defaultGroups) {
+        orderRegexes.push(...defaultGroups[item as keyof typeof defaultGroups]);
+        continue;
       }
+
+      try {
+        orderRegexes.push(new RegExp(item));
+      } catch {
+        // ungültige Regex ignorieren
+      }
+    }
+
+    const sourceCode = context.sourceCode ?? context.getSourceCode();
+    const parserServices = sourceCode.parserServices as any;
+
+    if (!parserServices?.defineTemplateBodyVisitor) {
+      return {};
+    }
+
+    return parserServices.defineTemplateBodyVisitor({
+      VAttribute(node: any) {
+        checkClasses(node);
+      },
     });
 
-    const parserServices = context.sourceCode.parserServices as any;
-
-    if (parserServices?.defineTemplateBodyVisitor) {
-      return parserServices.defineTemplateBodyVisitor({
-        VAttribute(node: any) {
-          checkClasses(node);
-        }
-      });
-    }
-    return {};
-
     function checkClasses(node: any) {
-      if (node.key.name === 'class' && node.value && node.value.type === 'VLiteral') {
+      if (node.key?.name === 'class' && node.value && node.value.type === 'VLiteral') {
         const originalValue = node.value.value as string;
         const classes = originalValue.split(/\s+/).filter(Boolean);
+
         if (classes.length <= 1) return;
 
         const sortedClasses = [...classes].sort((a, b) => {
           const scoreA = getScore(a);
           const scoreB = getScore(b);
+
           if (scoreA !== scoreB) {
             return scoreA - scoreB;
           }
+
           return a.localeCompare(b);
         });
 
         const sortedValue = sortedClasses.join(' ');
+
         if (originalValue !== sortedValue) {
           context.report({
             node: node.value,
             messageId: 'sortVuetifyClasses',
             fix(fixer) {
-              return fixer.replaceText(node.value as any, `"${sortedValue}"`);
-            }
+              return fixer.replaceText(node.value, `"${sortedValue}"`);
+            },
           });
         }
       }
@@ -115,9 +130,10 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
           return i;
         }
       }
-      return orderRegexes.length; // Default to end
+
+      return orderRegexes.length;
     }
-  }
+  },
 });
 
 export default sortVuetifyClassesRule;

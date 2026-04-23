@@ -1,5 +1,5 @@
-import sortVuetifyClasses from './rules/sort-vuetify-classes.js';
 import { Linter } from 'eslint';
+import sortVuetifyClasses from './rules/sort-vuetify-classes.js';
 
 interface Plugin {
   rules: Record<string, any>;
@@ -8,16 +8,18 @@ interface Plugin {
 
 const plugin: Plugin = {
   rules: {
-    'sort-vuetify-classes': sortVuetifyClasses
+    'sort-vuetify-classes': sortVuetifyClasses,
   },
   configs: {
     recommended: {
-      plugins: {},
+      plugins: {
+        'vuetify-sorting': undefined as any,
+      },
       rules: {
-        'vuetify-sorting/sort-vuetify-classes': 'warn'
-      }
-    }
-  }
+        'vuetify-sorting/sort-vuetify-classes': 'warn',
+      },
+    },
+  },
 };
 
 plugin.configs.recommended.plugins!['vuetify-sorting'] = plugin;
