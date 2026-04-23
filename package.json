@@ -1,0 +1,40 @@
+{
+  "name": "eslint-plugin-vuetify-sorting",
+  "version": "1.0.0",
+  "description": "ESLint plugin for sorting Vuetify classes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nsd0kleuschner/eslint-plugin-vuetify-sorting.git"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js"
+  },
+  "files": [
+    "lib"
+  ],
+  "peerDependencies": {
+    "eslint": ">=8.0.0",
+    "eslint-plugin-vue": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "vuetify",
+    "sorting",
+    "vue"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@typescript-eslint/utils": "^8.59.0",
+    "typescript": "^6.0.3"
+  }
+}
