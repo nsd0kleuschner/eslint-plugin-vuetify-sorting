@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-vuetify-sorting",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ESLint plugin for sorting Vuetify classes",
   "repository": {
     "type": "git",
