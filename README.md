@@ -4,10 +4,10 @@ An ESLint plugin to sort Vuetify classes in a consistent and configurable order.
 
 ## Installation
 
-You can install this plugin directly from your GitHub repository:
+You can install this plugin directly from this GitHub repository:
 
 ```bash
-npm install git+https://github.com/nsd0kleuschner/eslint-plugin-vuetify-sorting.git --save-dev
+npm install eslint-plugin-vuetify-sorting --save-dev
 ```
 
 ## Usage (Flat Config)
