@@ -2,6 +2,13 @@
 
 An ESLint plugin to sort Vuetify classes in a consistent and configurable order.
 
+## Supported Syntax
+
+- Static `class="..."` attributes on Vue template elements — sorted and autofixed.
+- Static `:class="[...]"` array bindings, when every element is a plain string literal (e.g. `:class="['pa-4', 'd-flex']"`) — sorted and autofixed.
+- `:class` bindings that mix in variables, ternaries, or spreads (e.g. `:class="['pa-4', isActive ? 'd-flex' : '']"`) are left untouched, since reordering could change which class wins under a condition.
+- `:class="{ ... }"` object syntax and plain JS/TS string concatenation are not covered.
+
 ## Installation
 
 You can install this plugin directly from this GitHub repository:

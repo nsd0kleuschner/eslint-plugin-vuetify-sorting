@@ -88,42 +88,94 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
 
     return parserServices.defineTemplateBodyVisitor({
       VAttribute(node: any) {
-        checkClasses(node);
+        if (node.key?.name === 'class' && node.value && node.value.type === 'VLiteral') {
+          checkStaticClassAttribute(node);
+          return;
+        }
+
+        if (
+          node.directive &&
+          node.key?.type === 'VDirectiveKey' &&
+          node.key.name?.name === 'bind' &&
+          node.key.argument?.type === 'VIdentifier' &&
+          node.key.argument.name === 'class' &&
+          node.value?.type === 'VExpressionContainer' &&
+          node.value.expression?.type === 'ArrayExpression'
+        ) {
+          checkClassArrayBinding(node.value.expression);
+        }
       },
     });
 
-    function checkClasses(node: any) {
-      if (node.key?.name === 'class' && node.value && node.value.type === 'VLiteral') {
-        const originalValue = node.value.value as string;
-        const classes = originalValue.split(/\s+/).filter(Boolean);
+    function checkStaticClassAttribute(node: any) {
+      const originalValue = node.value.value as string;
+      const classes = originalValue.split(/\s+/).filter(Boolean);
 
-        if (classes.length <= 1) return;
+      if (classes.length <= 1) return;
 
-        const sortedClasses = [...classes].sort((a, b) => {
-          const scoreA = getScore(a);
-          const scoreB = getScore(b);
+      const sortedClasses = [...classes].sort((a, b) => {
+        const scoreA = getScore(a);
+        const scoreB = getScore(b);
 
-          if (scoreA !== scoreB) {
-            return scoreA - scoreB;
-          }
-
-          return a.localeCompare(b);
-        });
-
-        const sortedValue = sortedClasses.join(' ');
-
-        if (originalValue !== sortedValue) {
-          context.report({
-            node: node.value,
-            messageId: 'sortVuetifyClasses',
-            fix(fixer) {
-              const raw = sourceCode.getText(node.value);
-              const quote = raw[0] === "'" ? "'" : '"';
-              return fixer.replaceText(node.value, `${quote}${sortedValue}${quote}`);
-            },
-          });
+        if (scoreA !== scoreB) {
+          return scoreA - scoreB;
         }
+
+        return a.localeCompare(b);
+      });
+
+      const sortedValue = sortedClasses.join(' ');
+
+      if (originalValue !== sortedValue) {
+        context.report({
+          node: node.value,
+          messageId: 'sortVuetifyClasses',
+          fix(fixer) {
+            const raw = sourceCode.getText(node.value);
+            const quote = raw[0] === "'" ? "'" : '"';
+            return fixer.replaceText(node.value, `${quote}${sortedValue}${quote}`);
+          },
+        });
       }
+    }
+
+    // Only handles fully static arrays (e.g. :class="['pa-4', 'd-flex']") — any
+    // non-string-literal element (variables, ternaries, spreads) means the order
+    // may be semantically meaningful, so the whole binding is left untouched.
+    function checkClassArrayBinding(arrayExpression: any) {
+      const elements = arrayExpression.elements;
+      if (!elements || elements.length <= 1) return;
+      if (elements.some((el: any) => !el || el.type !== 'Literal' || typeof el.value !== 'string')) {
+        return;
+      }
+
+      const items = elements.map((el: any) => ({ value: el.value as string, raw: sourceCode.getText(el) }));
+      const sortedItems = [...items].sort((a, b) => {
+        const scoreA = getScore(a.value);
+        const scoreB = getScore(b.value);
+
+        if (scoreA !== scoreB) {
+          return scoreA - scoreB;
+        }
+
+        return a.value.localeCompare(b.value);
+      });
+
+      const isAlreadySorted = items.every((item: { raw: string }, i: number) => item.raw === sortedItems[i].raw);
+      if (isAlreadySorted) return;
+
+      context.report({
+        node: arrayExpression,
+        messageId: 'sortVuetifyClasses',
+        fix(fixer) {
+          const firstElement = elements[0];
+          const lastElement = elements[elements.length - 1];
+          return fixer.replaceTextRange(
+            [firstElement.range[0], lastElement.range[1]],
+            sortedItems.map((item) => item.raw).join(', ')
+          );
+        },
+      });
     }
 
     function getScore(className: string): number {
