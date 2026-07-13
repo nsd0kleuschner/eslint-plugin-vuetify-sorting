@@ -1,6 +1,6 @@
 import { ESLintUtils } from '@typescript-eslint/utils';
 
-const defaultGroups: Record<string, RegExp[]> = {
+export const defaultGroups: Record<string, RegExp[]> = {
   components: [/^c-/, /^o-/],
   layout: [/^d-/, /^float-/, /^position-/, /^top-/, /^bottom-/, /^left-/, /^right-/, /^z-/, /^overflow-/, /^clear-/],
   flexGrid: [/^flex-/, /^justify-/, /^align-/, /^order-/, /^grid-/],
@@ -11,7 +11,7 @@ const defaultGroups: Record<string, RegExp[]> = {
   misc: [/^cursor-/, /^pointer-events-/, /^user-select-/]
 };
 
-const defaultOrder = [
+export const defaultOrder = [
   'components',
   'layout',
   'flexGrid',

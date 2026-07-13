@@ -85,14 +85,21 @@ An array of category names or regular expression strings defining the sorting or
 
 #### Available Categories (in default order):
 
-- `components and objects`: Classes starting with `c-`, `o-`
-- `layout`: `d-`, `float-`, `position-`, `top-`, `bottom-`, `left-`, `right-`, `z-`, `overflow-`, `clear-`
-- `flexGrid`: `flex-`, `justify-`, `align-`, `order-`, `grid-`, `v-col-`, `v-row-`
-- `sizing`: `w-`, `h-`, `min-w-`, `max-w-`, `min-h-`, `max-h-`, `mw-`, `mh-`, `fill-height`
-- `spacing`: `m-`, `p-`, `g-` (and variants like `ma-`, `px-`, etc.)
-- `typography`: `text-`, `font-`
-- `visuals`: `bg-`, `border-`, `rounded-`, `elevation-`, `theme--`, `opacity-`
-- `misc`: `cursor-`, `pointer-events-`, `user-select-`
+<!-- vuetify-sorting:categories:start -->
+<!-- Generated from src/rules/sort-vuetify-classes.ts by `npm run docs`. Do not edit by hand. -->
+
+- `components`: matches `^c-`, `^o-`
+- `layout`: matches `^d-`, `^float-`, `^position-`, `^top-`, `^bottom-`, `^left-`, `^right-`, `^z-`, `^overflow-`, `^clear-`
+- `flexGrid`: matches `^flex-`, `^justify-`, `^align-`, `^order-`, `^grid-`
+- `sizing`: matches `^w-`, `^h-`, `^min-w-`, `^max-w-`, `^min-h-`, `^max-h-`, `^mw-`, `^mh-`, `^fill-height`
+- `spacing`: matches `^[mp][atblrsexy]?-`, `^g[axy]-`
+- `typography`: matches `^text-`, `^font-`
+- `visuals`: matches `^bg-`, `^border-`, `^rounded-`, `^elevation-`, `^theme--`, `^opacity-`
+- `misc`: matches `^cursor-`, `^pointer-events-`, `^user-select-`
+
+<!-- vuetify-sorting:categories:end -->
+
+Classes are matched against these regular expressions directly, so this list can never drift from the rule's actual behavior — run `npm run docs` after changing `defaultGroups`/`defaultOrder` in the rule source to refresh it.
 
 You can also provide custom regular expressions as strings in the `order` array. For example, to add a custom group for icon classes before spacing:
 

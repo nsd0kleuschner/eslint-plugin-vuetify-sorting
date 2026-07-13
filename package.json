@@ -21,7 +21,9 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "docs": "npm run build && node scripts/generate-docs.mjs",
+    "docs:check": "npm run build && node scripts/generate-docs.mjs --check"
   },
   "keywords": [
     "eslint",
