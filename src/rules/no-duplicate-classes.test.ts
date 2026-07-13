@@ -1,15 +1,8 @@
-import { RuleTester } from 'eslint';
-import vueParser from 'vue-eslint-parser';
 import { describe, it } from 'vitest';
 import rule from './no-duplicate-classes.js';
+import { createVueRuleTester } from './vue-rule-tester.js';
 
-const ruleTester = new RuleTester({
-  languageOptions: {
-    parser: vueParser,
-    ecmaVersion: 2020,
-    sourceType: 'module',
-  },
-});
+const ruleTester = createVueRuleTester();
 
 describe('no-duplicate-classes', () => {
   it('passes RuleTester valid/invalid cases', () => {
