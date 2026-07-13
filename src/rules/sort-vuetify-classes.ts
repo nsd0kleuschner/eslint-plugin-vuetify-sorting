@@ -117,7 +117,9 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
             node: node.value,
             messageId: 'sortVuetifyClasses',
             fix(fixer) {
-              return fixer.replaceText(node.value, `"${sortedValue}"`);
+              const raw = sourceCode.getText(node.value);
+              const quote = raw[0] === "'" ? "'" : '"';
+              return fixer.replaceText(node.value, `${quote}${sortedValue}${quote}`);
             },
           });
         }

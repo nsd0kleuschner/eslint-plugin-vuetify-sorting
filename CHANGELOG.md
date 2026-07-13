@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Test suite (`vitest` + ESLint `RuleTester` via `vue-eslint-parser`) covering default sorting, autofix output, and custom `order` options.
 - CI (GitHub Actions): build + test on push/PR against Node 20 and 22.
 
+### Fixed
+
+- Autofix no longer forces double quotes on `class="..."` attributes that originally used single quotes — the fixer now preserves the source's quote character instead of hardcoding `"`.
+
 ## [1.0.5] - 2026-04-23
 
 ### Changed

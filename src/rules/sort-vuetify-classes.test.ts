@@ -50,6 +50,11 @@ describe('sort-vuetify-classes', () => {
           options: [{ order: ['spacing', '^icon-', 'typography'] }],
           errors: [{ messageId: 'sortVuetifyClasses' }],
         },
+        {
+          code: "<template><div class='pa-4 d-flex'></div></template>",
+          output: "<template><div class='d-flex pa-4'></div></template>",
+          errors: [{ messageId: 'sortVuetifyClasses' }],
+        },
       ],
     });
   });
