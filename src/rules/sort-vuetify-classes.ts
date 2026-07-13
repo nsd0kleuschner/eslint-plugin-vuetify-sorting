@@ -3,7 +3,10 @@ import {
   getClassBindingExpression,
   getStaticObjectKeyEntries,
   getStaticStringArrayElements,
+  getTemplateBodyParserServices,
   isStaticClassAttribute,
+  replaceNodeRangeWithList,
+  requoteLike,
 } from './vue-class-ast.js';
 
 export const defaultGroups: Record<string, RegExp[]> = {
@@ -86,9 +89,9 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
     }
 
     const sourceCode = context.sourceCode ?? context.getSourceCode();
-    const parserServices = (context as any).parserServices ?? (sourceCode as any).parserServices;
+    const parserServices = getTemplateBodyParserServices(context, sourceCode);
 
-    if (!parserServices?.defineTemplateBodyVisitor) {
+    if (!parserServices) {
       return {};
     }
 
@@ -132,9 +135,7 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
           node: node.value,
           messageId: 'sortVuetifyClasses',
           fix(fixer) {
-            const raw = sourceCode.getText(node.value);
-            const quote = raw[0] === "'" ? "'" : '"';
-            return fixer.replaceText(node.value, `${quote}${sortedValue}${quote}`);
+            return fixer.replaceText(node.value, requoteLike(sourceCode, node.value, sortedValue));
           },
         });
       }
@@ -166,12 +167,7 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
         node: arrayExpression,
         messageId: 'sortVuetifyClasses',
         fix(fixer) {
-          const firstElement = elements[0];
-          const lastElement = elements[elements.length - 1];
-          return fixer.replaceTextRange(
-            [firstElement.range[0], lastElement.range[1]],
-            sortedItems.map((item) => item.raw).join(', ')
-          );
+          return replaceNodeRangeWithList(fixer, elements, sortedItems.map((item) => item.raw));
         },
       });
     }
@@ -206,12 +202,7 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
         node: objectExpression,
         messageId: 'sortVuetifyClasses',
         fix(fixer) {
-          const firstProperty = properties[0];
-          const lastProperty = properties[properties.length - 1];
-          return fixer.replaceTextRange(
-            [firstProperty.range[0], lastProperty.range[1]],
-            sortedItems.map((item) => item.raw).join(', ')
-          );
+          return replaceNodeRangeWithList(fixer, properties, sortedItems.map((item) => item.raw));
         },
       });
     }

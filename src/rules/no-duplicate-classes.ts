@@ -3,7 +3,10 @@ import {
   getClassBindingExpression,
   getStaticObjectKeyEntries,
   getStaticStringArrayElements,
+  getTemplateBodyParserServices,
   isStaticClassAttribute,
+  replaceNodeRangeWithList,
+  requoteLike,
 } from './vue-class-ast.js';
 
 type MessageIds = 'duplicateClass' | 'duplicateClassKey';
@@ -29,9 +32,9 @@ const noDuplicateClassesRule = createRule<[], MessageIds>({
   },
   create(context) {
     const sourceCode = context.sourceCode ?? context.getSourceCode();
-    const parserServices = (context as any).parserServices ?? (sourceCode as any).parserServices;
+    const parserServices = getTemplateBodyParserServices(context, sourceCode);
 
-    if (!parserServices?.defineTemplateBodyVisitor) {
+    if (!parserServices) {
       return {};
     }
 
@@ -65,9 +68,7 @@ const noDuplicateClassesRule = createRule<[], MessageIds>({
         messageId: 'duplicateClass',
         data: { className: duplicates.join(', ') },
         fix(fixer) {
-          const raw = sourceCode.getText(node.value);
-          const quote = raw[0] === "'" ? "'" : '"';
-          return fixer.replaceText(node.value, `${quote}${dedupedValue}${quote}`);
+          return fixer.replaceText(node.value, requoteLike(sourceCode, node.value, dedupedValue));
         },
       });
     }
@@ -90,12 +91,7 @@ const noDuplicateClassesRule = createRule<[], MessageIds>({
         messageId: 'duplicateClass',
         data: { className: duplicates.join(', ') },
         fix(fixer) {
-          const firstElement = elements[0];
-          const lastElement = elements[elements.length - 1];
-          return fixer.replaceTextRange(
-            [firstElement.range[0], lastElement.range[1]],
-            dedupedRaw.join(', ')
-          );
+          return replaceNodeRangeWithList(fixer, elements, dedupedRaw);
         },
       });
     }
@@ -111,6 +107,8 @@ const noDuplicateClassesRule = createRule<[], MessageIds>({
       const duplicates = findDuplicates(keys);
       if (duplicates.length === 0) return;
 
+      const properties = entries.map((entry) => entry.property);
+
       const lastIndexForKey = new Map<string, number>();
       entries.forEach((entry, i) => lastIndexForKey.set(entry.key, i));
 
@@ -123,13 +121,7 @@ const noDuplicateClassesRule = createRule<[], MessageIds>({
         messageId: 'duplicateClassKey',
         data: { key: duplicates.join(', ') },
         fix(fixer) {
-          const properties = entries.map((entry) => entry.property);
-          const firstProperty = properties[0];
-          const lastProperty = properties[properties.length - 1];
-          return fixer.replaceTextRange(
-            [firstProperty.range[0], lastProperty.range[1]],
-            dedupedRaw.join(', ')
-          );
+          return replaceNodeRangeWithList(fixer, properties, dedupedRaw);
         },
       });
     }

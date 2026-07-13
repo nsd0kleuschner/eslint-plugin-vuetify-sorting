@@ -72,3 +72,30 @@ export function getStaticObjectKeyEntries(objectExpression: any): StaticObjectKe
 
   return entries;
 }
+
+// Both rules only activate inside Vue template bodies, which requires
+// vue-eslint-parser's defineTemplateBodyVisitor. Returns null (rule should
+// return {} from create()) when it isn't available — e.g. a project that
+// hasn't wired up eslint-plugin-vue's parser for .vue files.
+export function getTemplateBodyParserServices(context: any, sourceCode: any): any | null {
+  const parserServices = context.parserServices ?? sourceCode.parserServices;
+  return parserServices?.defineTemplateBodyVisitor ? parserServices : null;
+}
+
+// Reconstructs a quoted attribute value while preserving the source's
+// original quote character, instead of hardcoding one — autofixing a
+// single-quoted attribute should not silently flip it to double quotes.
+export function requoteLike(sourceCode: any, quotedNode: any, newInnerValue: string): string {
+  const raw = sourceCode.getText(quotedNode);
+  const quote = raw[0] === "'" ? "'" : '"';
+  return `${quote}${newInnerValue}${quote}`;
+}
+
+// Replaces the span from the first to the last of a contiguous list of AST
+// nodes (array elements or object properties) with a comma-joined list of
+// raw texts — the shared shape of every array/object autofix in this plugin.
+export function replaceNodeRangeWithList(fixer: any, nodes: any[], rawTexts: string[]) {
+  const first = nodes[0];
+  const last = nodes[nodes.length - 1];
+  return fixer.replaceTextRange([first.range[0], last.range[1]], rawTexts.join(', '));
+}
