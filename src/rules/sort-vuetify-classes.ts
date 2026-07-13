@@ -148,28 +148,7 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
       const elements = getStaticStringArrayElements(arrayExpression);
       if (!elements || elements.length <= 1) return;
 
-      const items = elements.map((el: any) => ({ value: el.value as string, raw: sourceCode.getText(el) }));
-      const sortedItems = [...items].sort((a, b) => {
-        const scoreA = getScore(a.value);
-        const scoreB = getScore(b.value);
-
-        if (scoreA !== scoreB) {
-          return scoreA - scoreB;
-        }
-
-        return a.value.localeCompare(b.value);
-      });
-
-      const isAlreadySorted = items.every((item: { raw: string }, i: number) => item.raw === sortedItems[i].raw);
-      if (isAlreadySorted) return;
-
-      context.report({
-        node: arrayExpression,
-        messageId: 'sortVuetifyClasses',
-        fix(fixer) {
-          return replaceNodeRangeWithList(fixer, elements, sortedItems.map((item) => item.raw));
-        },
-      });
+      sortAndFix(arrayExpression, elements, elements.map((el: any) => el.value as string));
     }
 
     // Handles :class="{ 'pa-4': true, 'd-flex': isFlex }" objects. Unlike array
@@ -181,9 +160,19 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
       const entries = getStaticObjectKeyEntries(objectExpression);
       if (!entries || entries.length <= 1) return;
 
-      const properties = entries.map((entry) => entry.property);
-      const items = entries.map((entry) => ({ key: entry.key, raw: sourceCode.getText(entry.property) }));
+      sortAndFix(
+        objectExpression,
+        entries.map((entry) => entry.property),
+        entries.map((entry) => entry.key)
+      );
+    }
 
+    // Shared by both binding checks above: sorts `nodes` by the category score
+    // (with an alphabetical tie-break) of their parallel `sortKeys`, and — if
+    // that changes anything — reports/fixes by replacing the node range with
+    // the reordered raw source texts.
+    function sortAndFix(reportNode: any, nodes: any[], sortKeys: string[]) {
+      const items = nodes.map((node, i) => ({ key: sortKeys[i], raw: sourceCode.getText(node) }));
       const sortedItems = [...items].sort((a, b) => {
         const scoreA = getScore(a.key);
         const scoreB = getScore(b.key);
@@ -195,14 +184,14 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
         return a.key.localeCompare(b.key);
       });
 
-      const isAlreadySorted = items.every((item: { raw: string }, i: number) => item.raw === sortedItems[i].raw);
+      const isAlreadySorted = items.every((item, i) => item.raw === sortedItems[i].raw);
       if (isAlreadySorted) return;
 
       context.report({
-        node: objectExpression,
+        node: reportNode,
         messageId: 'sortVuetifyClasses',
         fix(fixer) {
-          return replaceNodeRangeWithList(fixer, properties, sortedItems.map((item) => item.raw));
+          return replaceNodeRangeWithList(fixer, nodes, sortedItems.map((item) => item.raw));
         },
       });
     }
