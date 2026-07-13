@@ -137,7 +137,7 @@ export default [
 ];
 ```
 
-Classes that do not match any of the defined categories (or custom regexes) are moved to the end of the class list and sorted alphabetically.
+Classes that do not match any of the defined categories (or custom regexes) are moved to the end of the class list. Within any single category — and among unmatched classes — classes are sorted alphabetically relative to each other.
 
 ## License
 
