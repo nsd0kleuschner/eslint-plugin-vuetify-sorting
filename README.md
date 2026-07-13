@@ -1,8 +1,17 @@
 # eslint-plugin-vuetify-sorting
 
-An ESLint plugin to sort Vuetify classes in a consistent and configurable order.
+An ESLint plugin to sort Vuetify classes in a consistent and configurable order, and to catch duplicate classes.
+
+## Rules
+
+| Rule | Description | Autofix |
+| --- | --- | --- |
+| [`vuetify-sorting/sort-vuetify-classes`](#configuration-options) | Sorts classes into a configurable category order. | ✅ |
+| `vuetify-sorting/no-duplicate-classes` | Flags a repeated class name/key in the same binding (e.g. `class="pa-4 d-flex pa-4"`, or a duplicate `:class="{ ... }"` key). Both are included in `configs.recommended`. | ✅ |
 
 ## Supported Syntax
+
+Applies to both rules above.
 
 - Static `class="..."` attributes on Vue template elements — sorted and autofixed.
 - Static `:class="[...]"` array bindings, when every element is a plain string literal (e.g. `:class="['pa-4', 'd-flex']"`) — sorted and autofixed.

@@ -1,5 +1,6 @@
 import { Linter } from 'eslint';
 import sortVuetifyClasses from './rules/sort-vuetify-classes.js';
+import noDuplicateClasses from './rules/no-duplicate-classes.js';
 
 interface Plugin {
   rules: Record<string, any>;
@@ -9,6 +10,7 @@ interface Plugin {
 const plugin: Plugin = {
   rules: {
     'sort-vuetify-classes': sortVuetifyClasses,
+    'no-duplicate-classes': noDuplicateClasses,
   },
   configs: {
     recommended: {
@@ -17,6 +19,7 @@ const plugin: Plugin = {
       },
       rules: {
         'vuetify-sorting/sort-vuetify-classes': 'warn',
+        'vuetify-sorting/no-duplicate-classes': 'error',
       },
     },
   },
