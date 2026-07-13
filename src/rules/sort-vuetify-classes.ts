@@ -1,4 +1,10 @@
 import { ESLintUtils } from '@typescript-eslint/utils';
+import {
+  getClassBindingExpression,
+  getStaticObjectKeyEntries,
+  getStaticStringArrayElements,
+  isStaticClassAttribute,
+} from './vue-class-ast.js';
 
 export const defaultGroups: Record<string, RegExp[]> = {
   components: [/^c-/, /^o-/],
@@ -88,34 +94,16 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
 
     return parserServices.defineTemplateBodyVisitor({
       VAttribute(node: any) {
-        if (node.key?.name === 'class' && node.value && node.value.type === 'VLiteral') {
+        if (isStaticClassAttribute(node)) {
           checkStaticClassAttribute(node);
           return;
         }
 
-        if (
-          node.directive &&
-          node.key?.type === 'VDirectiveKey' &&
-          node.key.name?.name === 'bind' &&
-          node.key.argument?.type === 'VIdentifier' &&
-          node.key.argument.name === 'class' &&
-          node.value?.type === 'VExpressionContainer' &&
-          node.value.expression?.type === 'ArrayExpression'
-        ) {
-          checkClassArrayBinding(node.value.expression);
-          return;
-        }
-
-        if (
-          node.directive &&
-          node.key?.type === 'VDirectiveKey' &&
-          node.key.name?.name === 'bind' &&
-          node.key.argument?.type === 'VIdentifier' &&
-          node.key.argument.name === 'class' &&
-          node.value?.type === 'VExpressionContainer' &&
-          node.value.expression?.type === 'ObjectExpression'
-        ) {
-          checkClassObjectBinding(node.value.expression);
+        const expression = getClassBindingExpression(node);
+        if (expression?.type === 'ArrayExpression') {
+          checkClassArrayBinding(expression);
+        } else if (expression?.type === 'ObjectExpression') {
+          checkClassObjectBinding(expression);
         }
       },
     });
@@ -156,11 +144,8 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
     // non-string-literal element (variables, ternaries, spreads) means the order
     // may be semantically meaningful, so the whole binding is left untouched.
     function checkClassArrayBinding(arrayExpression: any) {
-      const elements = arrayExpression.elements;
+      const elements = getStaticStringArrayElements(arrayExpression);
       if (!elements || elements.length <= 1) return;
-      if (elements.some((el: any) => !el || el.type !== 'Literal' || typeof el.value !== 'string')) {
-        return;
-      }
 
       const items = elements.map((el: any) => ({ value: el.value as string, raw: sourceCode.getText(el) }));
       const sortedItems = [...items].sort((a, b) => {
@@ -197,34 +182,11 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
     // dynamic. Only bails on structure it can't safely reorder: spreads,
     // computed keys, getters/setters/methods, or non-string/non-identifier keys.
     function checkClassObjectBinding(objectExpression: any) {
-      const properties = objectExpression.properties;
-      if (!properties || properties.length <= 1) return;
+      const entries = getStaticObjectKeyEntries(objectExpression);
+      if (!entries || entries.length <= 1) return;
 
-      const keyNames: string[] = [];
-      for (const property of properties) {
-        if (
-          !property ||
-          property.type !== 'Property' ||
-          property.computed ||
-          property.method ||
-          property.kind !== 'init'
-        ) {
-          return;
-        }
-
-        if (property.key.type === 'Literal' && typeof property.key.value === 'string') {
-          keyNames.push(property.key.value);
-        } else if (property.key.type === 'Identifier') {
-          keyNames.push(property.key.name);
-        } else {
-          return;
-        }
-      }
-
-      const items = properties.map((property: any, i: number) => ({
-        key: keyNames[i],
-        raw: sourceCode.getText(property),
-      }));
+      const properties = entries.map((entry) => entry.property);
+      const items = entries.map((entry) => ({ key: entry.key, raw: sourceCode.getText(entry.property) }));
 
       const sortedItems = [...items].sort((a, b) => {
         const scoreA = getScore(a.key);
