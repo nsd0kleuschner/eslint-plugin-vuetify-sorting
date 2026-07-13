@@ -36,6 +36,18 @@ describe('sort-vuetify-classes', () => {
         {
           code: "<template><div :class=\"[dynamicClass, 'pa-4']\"></div></template>",
         },
+        {
+          code: "<template><div :class=\"{ 'd-flex': true, 'pa-4': isActive }\"></div></template>",
+        },
+        {
+          code: '<template><div :class="{ \'pa-4\': true }"></div></template>',
+        },
+        {
+          code: "<template><div :class=\"{ ...base, 'd-flex': true, 'pa-4': isActive }\"></div></template>",
+        },
+        {
+          code: "<template><div :class=\"{ [dynamicKey]: true, 'd-flex': isActive, 'pa-4': true }\"></div></template>",
+        },
       ],
       invalid: [
         {
@@ -72,6 +84,11 @@ describe('sort-vuetify-classes', () => {
         {
           code: '<template><div :class=\'["pa-4", "d-flex"]\'></div></template>',
           output: '<template><div :class=\'["d-flex", "pa-4"]\'></div></template>',
+          errors: [{ messageId: 'sortVuetifyClasses' }],
+        },
+        {
+          code: "<template><div :class=\"{ 'pa-4': true, 'd-flex': isActive }\"></div></template>",
+          output: "<template><div :class=\"{ 'd-flex': isActive, 'pa-4': true }\"></div></template>",
           errors: [{ messageId: 'sortVuetifyClasses' }],
         },
       ],

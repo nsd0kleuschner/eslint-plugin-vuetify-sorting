@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Test suite (`vitest` + ESLint `RuleTester` via `vue-eslint-parser`) covering default sorting, autofix output, and custom `order` options.
 - CI (GitHub Actions): build + test on push/PR against Node 20 and 22.
 - Support for sorting fully static `:class="[...]"` array bindings (string-literal elements only — mixed/dynamic elements are left untouched).
+- Support for sorting `:class="{ ... }"` object binding keys — works even with dynamic values, since key order never affects behavior. Skips objects with a spread or computed key.
 
 ### Fixed
 

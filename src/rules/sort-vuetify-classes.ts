@@ -103,6 +103,19 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
           node.value.expression?.type === 'ArrayExpression'
         ) {
           checkClassArrayBinding(node.value.expression);
+          return;
+        }
+
+        if (
+          node.directive &&
+          node.key?.type === 'VDirectiveKey' &&
+          node.key.name?.name === 'bind' &&
+          node.key.argument?.type === 'VIdentifier' &&
+          node.key.argument.name === 'class' &&
+          node.value?.type === 'VExpressionContainer' &&
+          node.value.expression?.type === 'ObjectExpression'
+        ) {
+          checkClassObjectBinding(node.value.expression);
         }
       },
     });
@@ -172,6 +185,69 @@ const sortVuetifyClassesRule = createRule<Options, MessageIds>({
           const lastElement = elements[elements.length - 1];
           return fixer.replaceTextRange(
             [firstElement.range[0], lastElement.range[1]],
+            sortedItems.map((item) => item.raw).join(', ')
+          );
+        },
+      });
+    }
+
+    // Handles :class="{ 'pa-4': true, 'd-flex': isFlex }" objects. Unlike array
+    // bindings, key order never affects behavior here — each key is toggled
+    // independently — so keys can be reordered even when their values are
+    // dynamic. Only bails on structure it can't safely reorder: spreads,
+    // computed keys, getters/setters/methods, or non-string/non-identifier keys.
+    function checkClassObjectBinding(objectExpression: any) {
+      const properties = objectExpression.properties;
+      if (!properties || properties.length <= 1) return;
+
+      const keyNames: string[] = [];
+      for (const property of properties) {
+        if (
+          !property ||
+          property.type !== 'Property' ||
+          property.computed ||
+          property.method ||
+          property.kind !== 'init'
+        ) {
+          return;
+        }
+
+        if (property.key.type === 'Literal' && typeof property.key.value === 'string') {
+          keyNames.push(property.key.value);
+        } else if (property.key.type === 'Identifier') {
+          keyNames.push(property.key.name);
+        } else {
+          return;
+        }
+      }
+
+      const items = properties.map((property: any, i: number) => ({
+        key: keyNames[i],
+        raw: sourceCode.getText(property),
+      }));
+
+      const sortedItems = [...items].sort((a, b) => {
+        const scoreA = getScore(a.key);
+        const scoreB = getScore(b.key);
+
+        if (scoreA !== scoreB) {
+          return scoreA - scoreB;
+        }
+
+        return a.key.localeCompare(b.key);
+      });
+
+      const isAlreadySorted = items.every((item: { raw: string }, i: number) => item.raw === sortedItems[i].raw);
+      if (isAlreadySorted) return;
+
+      context.report({
+        node: objectExpression,
+        messageId: 'sortVuetifyClasses',
+        fix(fixer) {
+          const firstProperty = properties[0];
+          const lastProperty = properties[properties.length - 1];
+          return fixer.replaceTextRange(
+            [firstProperty.range[0], lastProperty.range[1]],
             sortedItems.map((item) => item.raw).join(', ')
           );
         },
