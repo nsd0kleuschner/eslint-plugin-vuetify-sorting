@@ -4,7 +4,9 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.1.0] - 2026-07-13
+
+> Note: git already has a `v1.1.0` tag from 2026-04-23 pointing at a since-reverted commit (see the note under 1.0.4) — that tag is unrelated to and predates this release. To avoid confusion this release is intentionally left untagged in git; if you do want a tag for it, use something unambiguous (e.g. `v1.1.0-2`) rather than reusing `v1.1.0`.
 
 ### Added
 
@@ -61,7 +63,7 @@ Initial release.
 - `sort-vuetify-classes` rule: autofixable sorting of static Vue template `class` attributes into `components`, `layout`, `flexGrid`, `sizing`, `spacing`, `typography`, `visuals`, `misc` categories, unmatched classes sorted alphabetically at the end.
 - `recommended` flat-config export.
 
-[Unreleased]: https://github.com/nsd0kleuschner/eslint-plugin-vuetify-sorting/compare/7cdeca2...HEAD
+[1.1.0]: https://github.com/nsd0kleuschner/eslint-plugin-vuetify-sorting/compare/7cdeca2...c43b9f5
 [1.0.5]: https://github.com/nsd0kleuschner/eslint-plugin-vuetify-sorting/compare/cdf3151...7cdeca2
 [1.0.4]: https://github.com/nsd0kleuschner/eslint-plugin-vuetify-sorting/compare/v1.0.3...cdf3151
 [1.0.3]: https://github.com/nsd0kleuschner/eslint-plugin-vuetify-sorting/compare/v1.0.2...v1.0.3
